@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-node-join
+spec:
+  template:
+    metadata:
+      name: redis-node-join
+    spec:
+      containers:
+      - name: redis-node-join
+        image: alpine:3.5
+        command: [ "/bin/sh" ]
+        args:
+        - "-c"
+        - >
+          apk update &&
+          apk add --no-cache ruby wget &&
+          wget http://download.redis.io/redis-stable/src/redis-trib.rb &&
+          chmod 755 redis-trib.rb &&
+          gem install --no-ri --no-rdoc redis &&
+          ip_node_1=`getent hosts redis-node-1 | awk '{ print $1 }'` &&
+          ip_node_2=`getent hosts redis-node-2 | awk '{ print $1 }'` &&
+          ip_node_3=`getent hosts redis-node-3 | awk '{ print $1 }'` &&
+          ip_node_4=`getent hosts redis-node-4 | awk '{ print $1 }'` &&
+          ip_node_5=`getent hosts redis-node-5 | awk '{ print $1 }'` &&
+          ip_node_6=`getent hosts redis-node-6 | awk '{ print $1 }'` &&
+          echo 'yes' | ./redis-trib.rb create --replicas 1 ${ip_node_1}:6379 ${ip_node_2}:6379 ${ip_node_3}:6379 ${ip_node_4}:6379 ${ip_node_5}:6379 ${ip_node_6}:6379
+      restartPolicy: Never

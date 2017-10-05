@@ -1,0 +1,65 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis-node-2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+        tier: node-2
+    spec:
+      containers:
+      - name: redis
+        image: redis:3.2-alpine
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        command:
+        - redis-server
+        args:
+        - /etc/redis/redis.conf
+        - --protected-mode
+        - "no"
+        ports:
+        - name: service
+          containerPort: 6379
+          protocol: TCP
+        - name: cluster
+          containerPort: 16379
+          protocol: TCP
+        volumeMounts:
+          - name: redis-conf-volume
+            mountPath: /etc/redis
+          - name: redis-work-volume
+            mountPath: /var/lib/redis
+      volumes:
+      - name: redis-conf-volume
+        configMap:
+          name: redis-conf
+          items:
+          - key: redis.conf
+            path: redis.conf
+      - name: redis-work-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-node-2
+  labels:
+    app: redis
+    tier: node-2
+spec:
+  ports:
+  - name: service
+    port: 6379
+    targetPort: 6379
+  - name: cluster
+    port: 16379
+    targetPort: 16379
+  selector:
+    app: redis
+    tier: node-2
