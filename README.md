@@ -2,6 +2,8 @@
 
 [Redis cluster] on [Kubernetes].
 
+![redis-cluster](https://github.com/megmogmog1965/redis-cluster-k8s/raw/feature/images/redis-cluster.png "Redis Cluster")
+
 
 # How to run
 
